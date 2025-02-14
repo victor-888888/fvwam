@@ -37,7 +37,7 @@ call mpi_test_compute_time_end
 call mpi_test_time_end
 #endif
 call system_clock(count=end_clock_main)
-clock_comp=end_clock_main-end_clock_init
+clock_comp=end_clock_main-end_clock_init-mpi_clock_neigh_commu
 
 if(mpi_rank==0) then
   write(*,*) "begin to output"

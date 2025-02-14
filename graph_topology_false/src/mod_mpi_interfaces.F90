@@ -2206,14 +2206,11 @@ module mod_mpi_interfaces
       DO i=1,mpi_graph_indegree
         CALL MPI_RECV(mpi_recv_buf_tmp,mpi_cell_recv_indexes_1d_counts(i)*dimen1*dimen2,mpi_real_kind,&
                         mpi_graph_sources(i),100,MPI_COMM_WORLD,mpi_status,mpi_err)
-        CALL SYSTEM_CLOCK(mpi_clock_prep_recv_start)                                    
         CALL mpi_real_3d_prepare_recvbuf_onebyone(mpi_recv_buf_tmp, mpi_recv_data, dimen1,dimen2,i)
-        CALL SYSTEM_CLOCK(mpi_clock_prep_recv_end)                                    
-        mpi_clock_prep_recv=mpi_clock_prep_recv+mpi_clock_prep_recv_end-mpi_clock_prep_recv_start
       END DO
 !      write(*,*)"end MPI_RECV and mpi_real_3d_prepare_recvbuf_onebyone"
        CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_end) 
-       mpi_clock_neigh_commu=mpi_clock_neigh_commu+mpi_clock_neigh_commu_end-mpi_clock_neigh_commu_start-mpi_clock_prep_recv
+       mpi_clock_neigh_commu=mpi_clock_neigh_commu+mpi_clock_neigh_commu_end-mpi_clock_neigh_commu_start
 !      CALL MPI_NEIGHBOR_ALLTOALLV(mpi_send_buf_tmp, mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp, mpi_real_kind, &
 !                                  mpi_recv_buf_tmp, mpi_recv_indexes_counts_tmp, mpi_recv_indexes_displs_tmp, mpi_real_kind, &
 !                                  mpi_graph_comm, mpi_err)

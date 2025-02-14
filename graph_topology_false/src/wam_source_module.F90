@@ -4404,7 +4404,7 @@ LOGICAL, INTENT(IN), OPTIONAL  :: MASK(:,:,:)  !! INTEGRATION MASK.
 !     LOCAL VARIABLES.                                                         !
 !     ----------------                                                         !
 
-INTEGER  :: IJ, M, K
+INTEGER  :: IJ, M, K,mask_value
 REAL(real_kind)     :: TEMP(SIZE(F3,1),SIZE(F3,3))
 REAL(real_kind)     :: TEMPS
 
@@ -4420,7 +4420,13 @@ IF (PRESENT(MASK)) THEN
       DO IJ = 1,SIZE(F3,1)
          TEMPS = 0.
          DO K = 1, SIZE(F3,2) 
-            TEMPS = TEMPS + F3(IJ,K,M)*abs(MASK(IJ,K,M))
+            if(MASK(IJ,K,M)) then
+              mask_value=1
+            else
+              mask_value=0
+            end if
+            TEMPS = TEMPS + F3(IJ,K,M)*mask_value
+!            TEMPS = TEMPS + F3(IJ,K,M)*abs(MASK(IJ,K,M))
          END DO
          TEMP(IJ,M) = TEMPS
       END DO
@@ -4562,7 +4568,7 @@ LOGICAL, INTENT(IN),  OPTIONAL :: MASK (:,:,:)  !! INTERATION MASK.
 
 REAL(real_kind)     :: TEMP2(SIZE(F,1),SIZE(F,3))
 REAL(real_kind)     :: TEMPS
-INTEGER :: IJ, M, K
+INTEGER :: IJ, M, K,mask_value
 
 
 IF (PRESENT(MASK)) THEN
@@ -4577,7 +4583,13 @@ IF (PRESENT(MASK)) THEN
       DO IJ = 1,SIZE(F,1)
          TEMPS = 0.0_rk
          DO K = 1,SIZE(F,2) 
-            TEMPS = TEMPS + F(IJ,K,M)*abs(MASK(IJ,K,M))
+            if(MASK(IJ,K,M)) then
+              mask_value=1
+            else
+              mask_value=0
+            end if
+            TEMPS = TEMPS + F(IJ,K,M)*mask_value
+!            TEMPS = TEMPS + F(IJ,K,M)*abs(MASK(IJ,K,M))
             !TEMPS = TEMPS + FTMP(IJ,K,M)
          END DO
          TEMP2(IJ,M) = TEMPS
@@ -4761,7 +4773,7 @@ LOGICAL, INTENT(IN),  OPTIONAL :: MASK(:,:,:) !! INTEGRATION MASK.
 !     LOCAL VARIABLES.                                                         !
 !     ----------------                                                         !
 
-INTEGER :: IJ, M, K
+INTEGER :: IJ, M, K,mask_value
 REAL(real_kind)    :: TEMP(SIZE(F,1),SIZE(F,3))
 REAL(real_kind)    :: TEMPS
 
@@ -4778,7 +4790,13 @@ IF (PRESENT(MASK)) THEN
       DO IJ = 1,SIZE(F,1)
          TEMPS = 0.0_rk
          DO K = 1,SIZE(F,2) 
-            TEMPS = TEMPS + F(IJ,K,M)*abs(MASK(IJ,K,M))
+            if(MASK(IJ,K,M)) then
+              mask_value=1
+            else
+              mask_value=0
+            end if
+!            TEMPS = TEMPS + F(IJ,K,M)*abs(MASK(IJ,K,M))
+            TEMPS = TEMPS + F(IJ,K,M)*mask_value
          END DO
          TEMP(IJ,M) = TEMPS
       END DO
@@ -4918,7 +4936,7 @@ LOGICAL, INTENT(IN),  OPTIONAL :: MASK(:,:,:) !! INTEGRATION MASK.
 !     LOCAL VARIABLES.                                                         !
 !     ----------------                                                         !
 
-INTEGER :: IJ, M, K, I
+INTEGER :: IJ, M, K, I,mask_value
 REAL(real_kind)    :: DEL2
 REAL(real_kind)    :: TEMPS
 REAL(real_kind)    :: TEMP(SIZE(F,1),SIZE(F,3)), TEMP2(SIZE(F,1),SIZE(F,3))
@@ -4934,7 +4952,13 @@ IF (PRESENT(MASK)) THEN
             DO IJ = 1,SIZE(F,1)
                TEMPS = 0.
                DO K = 1,KL
-                  TEMPS = TEMPS + F(IJ,K,M)*abs(MASK(IJ,K,M))
+                  if(MASK(IJ,K,M)) then
+                    mask_value=1
+                  else
+                    mask_value=0
+                  end if
+                  TEMPS = TEMPS + F(IJ,K,M)*mask_value
+!                  TEMPS = TEMPS + F(IJ,K,M)*abs(MASK(IJ,K,M))
                END DO
                TEMP(IJ,M) = TEMPS
                I = cellIdxTab(IJ)

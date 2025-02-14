@@ -46,7 +46,7 @@ contains
         call fiona_add_var('r0', 'lonEdge',        long_name='Longitude on the edge',                       units='radian', dim_names=['nEdges      '],                 data_type='real(8)')
         call fiona_add_var('r0', 'latEdge',        long_name='Latitude on the edge',                        units='radian', dim_names=['nEdges      '],                 data_type='real(8)')
         ! Dynamical variables
-        call fiona_add_var('r0', 'N',              long_name='Wave action on the cell(actually use Directional Wave Spectrum)',                     units='m^2 s',      dim_names=['nCells','nDir','nFre'],            data_type='real(8)')
+        call fiona_add_var('r0', 'N',              long_name='Wave action on the cell(actually use Directional Wave Spectrum)',                     units='m^2 s',      dim_names=['nCells','nDir  ','nFre  '],            data_type='real(8)')
     
         call fiona_start_output('r0', time_elapsed_seconds(), new_file=.True.)
         

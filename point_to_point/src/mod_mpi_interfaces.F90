@@ -2152,17 +2152,13 @@ module mod_mpi_interfaces
 
       CALL mpi_real_3d_prepare_sendbuf(mpi_recv_data, mpi_send_buf_tmp, dimen1, dimen2,mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp)
       CALL mpi_3d_prepare_recv_counts_displs(mpi_recv_indexes_counts_tmp, mpi_recv_indexes_displs_tmp, dimen1,dimen2)
-      IF (mpi_rank == 0) THEN                                                       
-        CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_start)                                    
-      END IF                                                                        
+      CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_start)                                    
       CALL MPI_NEIGHBOR_ALLTOALLV(mpi_send_buf_tmp, mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp, mpi_real_kind, &
                                   mpi_recv_buf_tmp, mpi_recv_indexes_counts_tmp, mpi_recv_indexes_displs_tmp, mpi_real_kind, &
                                   mpi_graph_comm, mpi_err)
       CALL mpi_real_3d_prepare_recvbuf(mpi_recv_buf_tmp, mpi_recv_data, dimen1,dimen2)
-      IF (mpi_rank == 0) THEN                                                       
-        CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_end) 
-        mpi_clock_neigh_commu=mpi_clock_neigh_commu+mpi_clock_neigh_commu_end-mpi_clock_neigh_commu_start
-      END IF                                                                        
+      CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_end) 
+      mpi_clock_neigh_commu=mpi_clock_neigh_commu+mpi_clock_neigh_commu_end-mpi_clock_neigh_commu_start
       DEALLOCATE (mpi_send_indexes_1d_counts_tmp)
       DEALLOCATE (mpi_send_indexes_1d_displs_tmp)
       DEALLOCATE (mpi_recv_buf_tmp)
@@ -2180,8 +2176,8 @@ module mod_mpi_interfaces
       INTEGER :: mpi_status(MPI_STATUS_SIZE)
       INTEGER, ALLOCATABLE, DIMENSION(:) :: mpi_send_indexes_1d_counts_tmp
       INTEGER, ALLOCATABLE, DIMENSION(:) :: mpi_send_indexes_1d_displs_tmp
-      real(kind=real_kind), ALLOCATABLE, DIMENSION(:) :: mpi_send_buf_tmp
-      real(kind=real_kind), ALLOCATABLE, DIMENSION(:) :: mpi_recv_buf_tmp
+!      real(kind=real_kind), ALLOCATABLE, DIMENSION(:) :: mpi_send_buf_tmp
+!      real(kind=real_kind), ALLOCATABLE, DIMENSION(:) :: mpi_recv_buf_tmp
       INTEGER, ALLOCATABLE, DIMENSION(:) :: mpi_recv_indexes_counts_tmp
       INTEGER, ALLOCATABLE, DIMENSION(:) :: mpi_recv_indexes_displs_tmp
       INTEGER, ALLOCATABLE,DIMENSION(:) ::  mpi_req
@@ -2190,34 +2186,36 @@ module mod_mpi_interfaces
       ALLOCATE (mpi_send_indexes_1d_counts_tmp(mpi_graph_outdegree))
       ALLOCATE (mpi_send_indexes_1d_displs_tmp(mpi_graph_outdegree))
       ALLOCATE (mpi_req(mpi_graph_outdegree))
-      ALLOCATE (mpi_send_buf_tmp(INT(mpi_cell_send_indexes_1d_counts_sum * dimen1* dimen2,int_double)))
+      IF (.NOT. ALLOCATED(mpi_real_send_buf)) ALLOCATE (mpi_real_send_buf(INT(mpi_cell_send_indexes_1d_counts_sum * dimen1* dimen2,int_double)))
+      IF (.NOT. ALLOCATED(mpi_real_recv_buf)) ALLOCATE (mpi_real_recv_buf(mpi_num_halocell * dimen1*dimen2))
       ALLOCATE (mpi_recv_indexes_counts_tmp(mpi_graph_indegree))
       ALLOCATE (mpi_recv_indexes_displs_tmp(mpi_graph_indegree))
 
-      CALL mpi_real_3d_prepare_sendbuf(mpi_recv_data, mpi_send_buf_tmp, dimen1, dimen2,mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp)
+      CALL mpi_real_3d_prepare_sendbuf(mpi_recv_data, mpi_real_send_buf, dimen1, dimen2,mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp)
       CALL mpi_3d_prepare_recv_counts_displs(mpi_recv_indexes_counts_tmp, mpi_recv_indexes_displs_tmp, dimen1,dimen2)
       CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_start)                                    
       DO i=1,mpi_graph_outdegree
         start=mpi_send_indexes_1d_displs_tmp(i)+1
-        CALL MPI_ISEND(mpi_send_buf_tmp(start),mpi_send_indexes_1d_counts_tmp(i),mpi_real_kind,mpi_graph_dests(i),&
+        CALL MPI_ISEND(mpi_real_send_buf(start),mpi_send_indexes_1d_counts_tmp(i),mpi_real_kind,mpi_graph_dests(i),&
                         100,MPI_COMM_WORLD,mpi_req(i),mpi_err)
       END DO
-      ALLOCATE (mpi_recv_buf_tmp(maxval(mpi_cell_recv_indexes_1d_counts) * dimen1*dimen2))
       DO i=1,mpi_graph_indegree
-        CALL MPI_RECV(mpi_recv_buf_tmp,mpi_cell_recv_indexes_1d_counts(i)*dimen1*dimen2,mpi_real_kind,&
+        start=mpi_cell_recv_indexes_1d_displs(i)*dimen1*dimen2
+        CALL MPI_RECV(mpi_real_recv_buf(start),mpi_cell_recv_indexes_1d_counts(i)*dimen1*dimen2,mpi_real_kind,&
                         mpi_graph_sources(i),100,MPI_COMM_WORLD,mpi_status,mpi_err)
-        CALL mpi_real_3d_prepare_recvbuf_onebyone(mpi_recv_buf_tmp, mpi_recv_data, dimen1,dimen2,i)
       END DO
-        CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_end) 
-        mpi_clock_neigh_commu=mpi_clock_neigh_commu+mpi_clock_neigh_commu_end-mpi_clock_neigh_commu_start
-!      CALL MPI_NEIGHBOR_ALLTOALLV(mpi_send_buf_tmp, mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp, mpi_real_kind, &
-!                                  mpi_recv_buf_tmp, mpi_recv_indexes_counts_tmp, mpi_recv_indexes_displs_tmp, mpi_real_kind, &
+      CALL SYSTEM_CLOCK(mpi_clock_neigh_commu_end) 
+      mpi_clock_neigh_commu=mpi_clock_neigh_commu+mpi_clock_neigh_commu_end-mpi_clock_neigh_commu_start
+      CALL mpi_real_3d_prepare_recvbuf(mpi_real_recv_buf, mpi_recv_data,dimen1,dimen2)
+!      CALL mpi_real_3d_prepare_recvbuf_onebyone(mpi_real_recv_buf, mpi_recv_data, dimen1,dimen2,i)
+!      CALL MPI_NEIGHBOR_ALLTOALLV(mpi_real_send_buf, mpi_send_indexes_1d_counts_tmp, mpi_send_indexes_1d_displs_tmp, mpi_real_kind, &
+!                                  mpi_real_recv_buf, mpi_recv_indexes_counts_tmp, mpi_recv_indexes_displs_tmp, mpi_real_kind, &
 !                                  mpi_graph_comm, mpi_err)
 !
       DEALLOCATE (mpi_send_indexes_1d_counts_tmp)
       DEALLOCATE (mpi_send_indexes_1d_displs_tmp)
-      DEALLOCATE (mpi_recv_buf_tmp)
-      DEALLOCATE (mpi_send_buf_tmp)
+!      DEALLOCATE (mpi_recv_buf_tmp)
+!      DEALLOCATE (mpi_send_buf_tmp)
       DEALLOCATE (mpi_recv_indexes_counts_tmp)
       DEALLOCATE (mpi_recv_indexes_displs_tmp)
 

@@ -1,5 +1,7 @@
-FC = mpiifort
-FFLAGS = -O3 -fp-model precise
+ FC = mpif90
+ FFLAGS = -O3 -cpp -ffree-line-length-none
+# FC = mpiifort
+# FFLAGS = -O3 
  
  NC_LIB = $(shell nf-config --flibs)
  NC_INC = -I$(shell nf-config --includedir)

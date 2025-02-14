@@ -102,6 +102,8 @@ module mod_mpi_variables
   INTEGER, PUBLIC, ALLOCATABLE, DIMENSION(:) :: mpi_cell_recv_indexes_1d_counts ! receiving counts for each process
   INTEGER, PUBLIC, ALLOCATABLE, DIMENSION(:) :: mpi_cell_send_indexes_1d_displs ! sending displs for each process
   INTEGER, PUBLIC, ALLOCATABLE, DIMENSION(:) :: mpi_cell_recv_indexes_1d_displs ! receiving displs for each process
+  real(kind=real_kind), ALLOCATABLE, DIMENSION(:) :: mpi_real_recv_buf
+  real(kind=real_kind), ALLOCATABLE, DIMENSION(:) :: mpi_real_send_buf
   ! receiving counts for each process,only for process 0                        
   INTEGER, PUBLIC, ALLOCATABLE, DIMENSION(:) :: mpi_cell_recv_total_indexes_counts
 
